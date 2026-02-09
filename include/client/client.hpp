@@ -1,5 +1,5 @@
-#include <sys/socket.h>
 #include <arpa/inet.h>
+#include <string>
 
 #ifndef THESISUIS_CLIENT_HPP
 #define THESISUIS_CLIENT_HPP
@@ -7,16 +7,18 @@
 namespace Thesisuis{
     class Client {
         public:
+            // get user input
+            std::string userInput(bool = false);
             // create the socket
             int createSocket();
             // specify the server
             sockaddr_in getServerAddress();
             // connect to the server
-            void connect(int, sockaddr_in);
+            void connectToServer(int, sockaddr_in);
             // Send data
-            void send(int, const char*);
+            void sendData(int, const char*);
             // close socket
-            void close();
+            void closeSocket(int);
     };
 }
 
