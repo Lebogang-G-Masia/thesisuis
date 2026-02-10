@@ -2,26 +2,20 @@
 #include <cstring>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <termios.h>
 #include "../../include/client/client.hpp"
+#include "../../include/utils.hpp"
 
 using namespace Thesisuis;
 
-std::string Client::userInput(bool hide) {
-    std::string input {};
-
-    if (hide) {
-       termios oldt;
-       tcgetattr(STDIN_FILENO, &oldt);
-       termios newt = oldt;
-       newt.c_lflag &= ~ECHO;
-       tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-       std::getline(std::cin, input);
-       tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-       return input;
-    }
-    std::getline(std::cin, input);
-    return input;
+std::vector<const char*> Client::signin() {
+    std::cout << "Enter username." << std::endl;
+    std::cout << ">> " << std::endl;
+    std::string username = userInput();
+    std::string password = userInput(true);
+    const char* uname = username.c_str();
+    const char* psswd = password.c_str();
+    std::vector<const char*> creds = { uname, psswd};
+    return creds;
 }
 
 int Client::createSocket() {
