@@ -43,10 +43,12 @@ sockaddr_in Client::getServerAddress() {
 }
 
 void Client::connectToServer(int clientSocket, sockaddr_in serverAddress) {
+    std::cout << "[ ~ ] Connecting to server." << std::endl;
     if (connect(clientSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) {
         std::cerr << "Connection Failed" << std::endl;
         exit(1);
     }
+    std::cout << "[ + ] Connected successfully" << std::endl;
 }
 
 void Client::sendData(int clientSocket, const char* msg) {
