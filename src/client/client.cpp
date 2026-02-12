@@ -7,15 +7,17 @@
 
 using namespace Thesisuis;
 
-std::vector<const char*> Client::signin() {
+void Client::signin(int clientSocket) {
     std::cout << "Enter username." << std::endl;
-    std::cout << ">> " << std::endl;
+    std::cout << ">> "; 
     std::string username = userInput();
-    std::string password = userInput(true);
+    std::cout << "Enter password." << std::endl;
+    std::cout << ">> ";
+    std::string password = userInput();
     const char* uname = username.c_str();
     const char* psswd = password.c_str();
-    std::vector<const char*> creds = { uname, psswd};
-    return creds;
+    sendData(clientSocket, uname);
+    sendData(clientSocket, psswd);
 }
 
 int Client::createSocket() {

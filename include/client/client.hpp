@@ -1,5 +1,4 @@
 #include <arpa/inet.h>
-#include <vector>
 
 #ifndef THESISUIS_CLIENT_HPP
 #define THESISUIS_CLIENT_HPP
@@ -7,7 +6,7 @@
 namespace Thesisuis{
     class Client {
         public:
-            std::vector<const char*> signin();
+            void signin(int clientSocket);
             // create the socket
             int createSocket();
             // specify the server

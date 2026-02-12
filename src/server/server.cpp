@@ -1,9 +1,52 @@
 #include <iostream>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <fstream>
+#include <cstdlib>
 #include "../../include/server/server.hpp"
+#include "../../include/utils.hpp"
 
 using namespace Thesisuis;
+
+bool Server::authenticate(int clientSocket) {
+    std::string uname = receiveData(clientSocket);
+    std::string passwd = receiveData(clientSocket);
+    // try opening credentials file for reading
+    std::ifstream credsFile("creds.txt");
+    if (credsFile.is_open()) {
+        std::string cred {};
+        while(std::getline(credsFile, cred)) {
+            std::string username = split(cred).at(0);
+            if (username != uname) continue;
+            std::string password = split(cred).at(1);
+            if (password == passwd) return true;
+
+        }
+    } else {
+        std::cout << "Creating the user" << std::endl;
+        addUser(uname, passwd);
+        return true;
+    }
+    return false;
+}
+
+void Server::addUser(std::string uname, std::string passwd, bool exists) {
+    if (exists) {
+        std::ofstream creds;
+        creds.open("creds.txt", std::ios::app);
+
+        if (creds.is_open()) {
+            creds << uname << ":" << passwd << std::endl;
+            creds.close();
+        }
+    } else {
+        std::ofstream creds("creds.txt");
+        if (creds.is_open()) {
+            creds << uname << ":" << passwd << std::endl;
+            creds.close();
+        }
+    }
+}
 
 int Server::createSocket() {
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -44,13 +87,15 @@ int Server::acceptConnection(int serverSocket) {
     return clientSocket;
 }
 
-char* Server::receiveData(int clientSocket) {
+std::string Server::receiveData(int clientSocket) {
     char buffer[1024] = {0};
-    recv(clientSocket, buffer, sizeof(buffer), 0);
-    return buffer;
+    int bytesRecv = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+    if (bytesRecv <= 0) return "";
+    return std::string(buffer, bytesRecv);
 }
 
 void Server::closeSockets(int serverSocket, int clientSocket) {
     close(serverSocket);
     close(clientSocket);
 }
+
