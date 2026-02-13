@@ -1,3 +1,4 @@
+#include <asm-generic/socket.h>
 #include <iostream>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -63,6 +64,12 @@ sockaddr_in Server::bindSocket(int serverSocket) {
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(8080);
     serverAddress.sin_addr.s_addr = INADDR_ANY;
+
+    int opt = 1;
+    if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
+        std::cerr << "Failed to set socket options" << std::endl;
+        exit(1);
+    }
 
     if (bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) {
         std::cerr << "Failed to bind the socket" << std::endl;
