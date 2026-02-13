@@ -89,10 +89,21 @@ int Server::acceptConnection(int serverSocket) {
 }
 
 std::string Server::receiveData(int clientSocket) {
-    char buffer[1024] = {0};
-    int bytesRecv = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+    uint32_t network_length = 0;
+    int bytesRecv = recv(clientSocket, &network_length, sizeof(network_length), 0);
     if (bytesRecv <= 0) return "";
-    return std::string(buffer, bytesRecv);
+    // convert back to host bytes order
+    uint32_t length = ntohl(network_length);
+
+    std::vector<char> buffer(length);
+    uint32_t totalRecv = 0;
+
+    while (totalRecv < length) {
+        int b = recv(clientSocket, buffer.data() + totalRecv, length - totalRecv, 0);
+        if (b <= 0) return "";
+        totalRecv += b;
+    }
+    return std::string(buffer.data(), totalRecv);
 }
 
 void Server::closeSockets(int serverSocket, int clientSocket) {
