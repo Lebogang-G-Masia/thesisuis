@@ -6,7 +6,7 @@ SERVER_DIR = src/server
 
 all: client server
 
-client: $(CLIENT_DIR)/client.cpp 
+client: $(CLIENT_DIR)/client.cpp
 	$(CXX) $(CXXFLAGS) -o client $(CLIENT_DIR)/client.cpp $(CLIENT_DIR)/client_main.cpp src/utils.cpp	 
 
 server: $(SERVER_DIR)/server.cpp 

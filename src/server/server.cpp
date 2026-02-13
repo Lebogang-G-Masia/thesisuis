@@ -16,9 +16,10 @@ bool Server::authenticate(int clientSocket) {
     if (credsFile.is_open()) {
         std::string cred {};
         while(std::getline(credsFile, cred)) {
-            std::string username = split(cred).at(0);
+            std::vector<std::string> split_creds = split(cred);
+            std::string username = split_creds.at(0);
             if (username != uname) continue;
-            std::string password = split(cred).at(1);
+            std::string password = split_creds.at(1);
             if (password == passwd) return true;
 
         }
