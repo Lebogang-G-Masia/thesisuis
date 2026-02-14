@@ -25,7 +25,7 @@ std::string userInput(bool hide) {
     return input;
 }
 
-std::vector<std::string_view> split(std::string_view& s, const std::string& delimiter) {
+std::vector<std::string_view> split(std::string_view& s, const std::string_view& delimiter) {
     std::vector<std::string_view> tokens;
     size_t pos = 0;
     while ((pos = s.find(delimiter)) != std::string_view::npos) {

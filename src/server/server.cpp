@@ -1,9 +1,9 @@
-#include <asm-generic/socket.h>
 #include <iostream>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <fstream>
 #include <cstdlib>
+#include <stdexcept>
 #include "../../include/server/server.hpp"
 #include "../../include/utils.hpp"
 
@@ -17,10 +17,13 @@ bool Server::authenticate(int clientSocket) {
     if (credsFile.is_open()) {
         std::string cred {};
         while(std::getline(credsFile, cred)) {
-            std::vector<std::string> split_creds = split(cred);
-            std::string username = split_creds.at(0);
+            std::string_view cred_v = cred;
+            std::vector<std::string_view> split_creds = split(cred_v);
+            if (split_creds.size() < 2) continue;
+
+            std::string_view username = split_creds.at(0);
             if (username != uname) continue;
-            std::string password = split_creds.at(1);
+            std::string_view password = split_creds.at(1);
             if (password == passwd) return true;
 
         }
@@ -53,8 +56,7 @@ void Server::addUser(std::string uname, std::string passwd, bool exists) {
 int Server::createSocket() {
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket == -1) {
-        std::cerr << "Failed to create the server socket" << std::endl;
-        exit(1);
+        throw std::runtime_error("Failed to create the server socket");
     }
     return serverSocket;
 }
@@ -67,21 +69,18 @@ sockaddr_in Server::bindSocket(int serverSocket) {
 
     int opt = 1;
     if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
-        std::cerr << "Failed to set socket options" << std::endl;
-        exit(1);
+        throw std::runtime_error("Failed to set socket option");
     }
 
     if (bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) {
-        std::cerr << "Failed to bind the socket" << std::endl;
-        exit(1);
+        throw std::runtime_error("Failed to bind the socket");
     }
     return serverAddress;
 }
 
 void Server::listenForConnection(int serverSocket) {
     if (listen(serverSocket, 5) == -1) {
-        std::cerr << "Failed to listen for a connection" << std::endl;
-        exit(1);
+        throw std::runtime_error("Failed to listen");
     }
     std::cout << "Listening on port 8080..." << std::endl;
 }
@@ -89,8 +88,7 @@ void Server::listenForConnection(int serverSocket) {
 int Server::acceptConnection(int serverSocket) {
     int clientSocket = accept(serverSocket, nullptr, nullptr);
     if (clientSocket == -1) {
-        std::cerr << "Failed to accept connection" << std::endl;
-        exit(1);
+        throw std::runtime_error("Failed to accept a connection");
     }
     return clientSocket;
 }

@@ -12,9 +12,10 @@ void Client::signin(int clientSocket) {
     std::string username = userInput();
     std::cout << "Enter password." << std::endl;
     std::cout << ">> ";
-    std::string password = userInput();
+    std::string password = userInput(true);
+    std::cout << std::endl;
     sendData(clientSocket, username);
-    sendData(clientSocket, username);
+    sendData(clientSocket, password);
 }
 
 int Client::createSocket() {
@@ -53,7 +54,7 @@ void Client::connectToServer(int clientSocket, sockaddr_in serverAddress) {
 void Client::sendData(int clientSocket, const std::string& msg) {
     uint32_t length = htonl(msg.length());
     send(clientSocket, &length, sizeof(length), 0);
-    send(clientSocket, msg.c_str(), length, 0);
+    send(clientSocket, msg.c_str(), msg.length(), 0);
 }
 
 void Client::closeSocket(int clientSocket) {
