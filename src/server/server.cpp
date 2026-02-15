@@ -1,17 +1,30 @@
 #include <iostream>
+#include <sstream>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <fstream>
-#include <cstdlib>
 #include <stdexcept>
 #include "../../include/server/server.hpp"
 #include "../../include/utils.hpp"
 
 using namespace Thesisuis;
 
+std::string Server::hash_password(const std::string& password) {
+    std::hash<std::string> hasher;
+    std::size_t hashed = hasher(password);
+
+    std::stringstream ss;
+    ss << std::hex << hashed;
+    return ss.str();
+}
+
 bool Server::authenticate(int clientSocket) {
     std::string uname = receiveData(clientSocket);
     std::string passwd = receiveData(clientSocket);
+
+    // hash the password
+    std::string hash = hash_password(passwd);
+
     // try opening credentials file for reading
     std::ifstream credsFile("creds.txt");
     if (credsFile.is_open()) {
@@ -23,8 +36,8 @@ bool Server::authenticate(int clientSocket) {
 
             std::string_view username = split_creds.at(0);
             if (username != uname) continue;
-            std::string_view password = split_creds.at(1);
-            if (password == passwd) return true;
+            std::string_view password_hash = split_creds.at(1);
+            if (password_hash == hash) return true;
 
         }
     } else {
