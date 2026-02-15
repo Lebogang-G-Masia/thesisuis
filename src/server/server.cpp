@@ -1,11 +1,13 @@
 #include <iostream>
 #include <sstream>
 #include <sys/socket.h>
+#include <thread>
 #include <unistd.h>
 #include <fstream>
 #include <stdexcept>
 #include "../../include/server/server.hpp"
 #include "../../include/utils.hpp"
+#include "../../include/socket_guard.hpp"
 
 using namespace Thesisuis;
 
@@ -129,3 +131,21 @@ void Server::closeSockets(int serverSocket, int clientSocket) {
     close(clientSocket);
 }
 
+void handleClients(int rawSocket, Server& server) {
+    SocketGuard clientSocket(rawSocket);
+    try {
+        if (!server.authenticate(clientSocket.get())) {
+            std::cerr << "Authentication failed for the socket: " << clientSocket.get() << std::endl;
+            return;
+        }
+        std::cout << "Client authenticated on thread: " << std::this_thread::get_id();
+        std::string msg = server.receiveData(clientSocket.get());
+        while (!msg.empty() && msg != "exit") {
+            std::cout << "[Client " << clientSocket.get() << "]: " << msg << std::endl;
+            msg = server.receiveData(clientSocket.get());
+        }
+    } catch (const std::exception& e) {
+        std::cout << e.what() << std::endl;
+    }
+    std::cout << "Closing connection for socket: " << clientSocket.get() << std::endl;
+}

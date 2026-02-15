@@ -23,6 +23,8 @@ namespace Thesisuis {
             std::string receiveData(int);
             // Close sockets
             void closeSockets(int, int);
+            // Handle multiple clients
+            void handleClients(int, Server&);
     };
 }
 

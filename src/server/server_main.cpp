@@ -1,7 +1,8 @@
 #include "../../include/server/server.hpp"
 #include "../../include/socket_guard.hpp"
+#include "../../include/thread_pool.hpp"
+#include <exception>
 #include <iostream>
-#include <stdexcept>
 
 using namespace Thesisuis;
 
@@ -12,28 +13,22 @@ int main() {
     
         server.bindSocket(serverSocket.get());
         server.listenForConnection(serverSocket.get());
+        std::size_t num_workers = std::thread::hardware_concurrency();
+
+        Pool pool(num_workers);
+        std::cout << "Server started with " << num_workers << " workers" << std::endl;
+
     
         std::cout << "Waiting for connections..." << std::endl;
     
         while (true) {
-            try {
-                SocketGuard clientSocket(server.acceptConnection(serverSocket.get()));
-                std::cout << "Client connected." << std::endl;
-    
-                if (!server.authenticate(clientSocket.get())) {
-                    std::cerr << "Authentication Failed" << std::endl;
-                    continue;
-                }
-                std::cout << "Authentication successful" << std::endl;
-                std::string msg = server.receiveData(clientSocket.get());
-                std::cout << msg << std::endl;
-            } catch (const std::exception& e) {
-                std::cerr << "Error handling client: " << e.what() << std::endl;
-            }
+            int client_fd = server.acceptConnection(serverSocket.get());
+            pool.enqueue([client_fd, &server] {
+                    server.handleClients(client_fd, server); 
+                    });
         }
     } catch (const std::exception& e) {
-        std::cerr << "Fatal server error: " << e.what() << std::endl;
-        return 1;
+        std::cout << "Fatal Error: " << e.what() << std::endl;
     }
     return 0;
 }
