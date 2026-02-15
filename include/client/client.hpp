@@ -15,7 +15,7 @@ namespace Thesisuis{
             // connect to the server
             void connectToServer(int, sockaddr_in);
             // Send data
-            void sendData(int, const std::string&);
+            void sendData(int, std::string&);
             // close socket
             void closeSocket(int);
     };

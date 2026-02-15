@@ -51,7 +51,7 @@ void Client::connectToServer(int clientSocket, sockaddr_in serverAddress) {
     std::cout << "[ + ] Connected successfully" << std::endl;
 }
 
-void Client::sendData(int clientSocket, const std::string& msg) {
+void Client::sendData(int clientSocket, std::string& msg) {
     uint32_t length = htonl(msg.length());
     send(clientSocket, &length, sizeof(length), 0);
     send(clientSocket, msg.c_str(), msg.length(), 0);

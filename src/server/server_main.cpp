@@ -25,6 +25,8 @@ int main() {
                     continue;
                 }
                 std::cout << "Authentication successful" << std::endl;
+                std::string msg = server.receiveData(clientSocket.get());
+                std::cout << msg << std::endl;
             } catch (const std::exception& e) {
                 std::cerr << "Error handling client: " << e.what() << std::endl;
             }

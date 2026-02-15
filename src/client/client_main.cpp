@@ -10,12 +10,9 @@ int main() {
     client.connectToServer(clientSocket, serverAddress);
     client.signin(clientSocket);
     std::string msg;
-    std::cout << ">> ";
-    std::getline(std::cin, msg);
-    while (msg != "exit") {
-        const char* message = msg.c_str();
-        client.sendData(clientSocket, message);
-        std::cout << ">> ";
+    while (true) {
+        std::cout << "#> ";
         std::getline(std::cin, msg);
+        client.sendData(clientSocket, msg);
     }
 }
