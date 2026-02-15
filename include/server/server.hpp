@@ -9,6 +9,7 @@ namespace Thesisuis {
         public:
             // Authenticate user
             bool authenticate(int);
+            std::string hash_password(const std::string&);
             void addUser(std::string, std::string, bool=false);
             // Create the socket
             int createSocket();
