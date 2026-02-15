@@ -131,7 +131,7 @@ void Server::closeSockets(int serverSocket, int clientSocket) {
     close(clientSocket);
 }
 
-void handleClients(int rawSocket, Server& server) {
+void Server::handleClients(int rawSocket, Server& server) {
     SocketGuard clientSocket(rawSocket);
     try {
         if (!server.authenticate(clientSocket.get())) {

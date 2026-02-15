@@ -18,8 +18,15 @@ namespace Thesisuis {
             bool stop;
         public:
             Pool(std::size_t); 
+            
             template <class F>
-                void enqueue(F&&);
+            void enqueue(F&& f) {
+                {
+                    std::unique_lock<std::mutex> lock(queue_mutex);
+                    tasks.emplace(std::forward<F>(f));
+                }
+                condition.notify_one();
+            } 
             ~Pool();
 
     };

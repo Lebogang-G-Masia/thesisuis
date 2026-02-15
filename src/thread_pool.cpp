@@ -22,14 +22,6 @@ Pool::Pool(std::size_t num_workers) : stop(false) {
     }
 }
 
-template <class F>
-void Pool::enqueue(F&& f) {
-    {
-        std::unique_lock<std::mutex> lock(queue_mutex);
-        tasks.emplace(std::forward<F>(f));
-    }
-    condition.notify_one();
-}
 
 Pool::~Pool() {
     {
