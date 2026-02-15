@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -Wextra -g
+CXXFLAGS = -Wall -Wextra -g -O3 -march=native -pthread
 
 CLIENT_DIR = src/client
 SERVER_DIR = src/server
