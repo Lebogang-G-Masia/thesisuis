@@ -2,6 +2,9 @@
 #include <termios.h>
 #include <unistd.h>
 #include <iostream>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
 
 void crash() {
     int* ptr = nullptr;
@@ -35,4 +38,28 @@ std::vector<std::string_view> split(std::string_view& s, const std::string_view&
     tokens.push_back(s);
 
     return tokens;
+}
+
+void sendData(int clientSocket, std::string& msg) {
+    uint32_t length = htonl(msg.length());
+    send(clientSocket, &length, sizeof(length), 0);
+    send(clientSocket, msg.c_str(), msg.length(), 0);
+}
+
+std::string receiveData(int clientSocket) {
+    uint32_t network_length = 0;
+    int bytesRecv = recv(clientSocket, &network_length, sizeof(network_length), 0);
+    if (bytesRecv <= 0) return "";
+    // convert back to host bytes order
+    uint32_t length = ntohl(network_length);
+
+    std::vector<char> buffer(length);
+    uint32_t totalRecv = 0;
+
+    while (totalRecv < length) {
+        int b = recv(clientSocket, buffer.data() + totalRecv, length - totalRecv, 0);
+        if (b <= 0) return "";
+        totalRecv += b;
+    }
+    return std::string(buffer.data(), totalRecv);
 }

@@ -1,5 +1,4 @@
 #include <arpa/inet.h>
-#include <string>
 
 #ifndef THESISUIS_CLIENT_HPP
 #define THESISUIS_CLIENT_HPP
@@ -14,8 +13,6 @@ namespace Thesisuis{
             sockaddr_in getServerAddress();
             // connect to the server
             void connectToServer(int, sockaddr_in);
-            // Send data
-            void sendData(int, std::string&);
             // close socket
             void closeSocket(int);
     };

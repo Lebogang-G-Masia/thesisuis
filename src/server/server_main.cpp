@@ -17,12 +17,11 @@ int main() {
 
         Pool pool(num_workers);
         std::cout << "Server started with " << num_workers << " workers" << std::endl;
-
-    
         std::cout << "Waiting for connections..." << std::endl;
     
         while (true) {
             int client_fd = server.acceptConnection(serverSocket.get());
+            std::cout << "Connection accepted from: " << client_fd << std::endl;
             pool.enqueue([client_fd, &server] {
                     server.handleClients(client_fd, server); 
                     });

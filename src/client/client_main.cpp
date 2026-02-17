@@ -1,18 +1,21 @@
 #include "../../include/client/client.hpp"
+#include "../../include/utils.hpp"
+#include "../../include/socket_guard.hpp"
 #include <iostream>
 
 using namespace Thesisuis;
 
 int main() {
     Client client;
-    int clientSocket = client.createSocket();
+    SocketGuard clientSocket(client.createSocket());
     sockaddr_in serverAddress = client.getServerAddress();
-    client.connectToServer(clientSocket, serverAddress);
-    client.signin(clientSocket);
-    std::string msg;
+    client.connectToServer(clientSocket.get(), serverAddress);
+    client.signin(clientSocket.get());
     while (true) {
         std::cout << "#> ";
-        std::getline(std::cin, msg);
-        client.sendData(clientSocket, msg);
+        std::string cmd {};
+        std::getline(std::cin, cmd);
+        sendData(clientSocket.get(), cmd);
     }
+    return 0;
 }
