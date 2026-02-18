@@ -1,7 +1,6 @@
 #include <iostream>
 #include <sstream>
 #include <sys/socket.h>
-#include <thread>
 #include <unistd.h>
 #include <fstream>
 #include <stdexcept>
@@ -14,8 +13,25 @@
 using namespace Thesisuis;
 
 Server::Server() {
+    // Initialize the server
+    // default credentials:
+    // username = root
+    // password = toor
+    std::fstream creds;
+    creds.open("creds.txt");
+    if (!creds.is_open()) {
+        std::string username = "root";
+        std::string password = "toor";
+        std::string hash = hash_password(password);
+        addUser(username, hash);
+    }
+    creds.close();
+    // Add commands to the vector
+    commands.push_back("add_user");
 }
-std::string Server::hash_password(const std::string& password) { std::hash<std::string> hasher;
+
+std::string Server::hash_password(const std::string& password) { 
+    std::hash<std::string> hasher;
     std::size_t hashed = hasher(password);
 
     std::stringstream ss;
@@ -47,29 +63,24 @@ bool Server::authenticate(int clientSocket) {
             if (password_hash == hash) return true;
 
         }
-    } else {
-        std::cout << "Creating the user" << std::endl;
-        addUser(uname, hash);
-        return true;
-    }
+    } 
     return false;
 }
 
 void Server::addUser(std::string uname, std::string passwd, bool exists) {
-    if (exists) {
-        std::ofstream creds;
-        creds.open("creds.txt", std::ios::app);
-
-        if (creds.is_open()) {
-            creds << uname << ":" << passwd << std::endl;
-            creds.close();
-        }
-    } else {
+    if (!exists) {
         std::ofstream creds("creds.txt");
         if (creds.is_open()) {
             creds << uname << ":" << passwd << std::endl;
-            creds.close();
         }
+        creds.close();
+    } else {
+        std::ofstream creds;
+        creds.open("creds.txt", std::ios::app);
+        if (creds.is_open()) {
+            creds << uname << ":" << passwd << std::endl;
+        }
+        creds.close();
     }
 }
 
@@ -126,14 +137,16 @@ void Server::handleClients(int rawSocket, Server& server) {
             std::cout << "[Client " << clientSocket.get() << "]: " << cmd << std::endl;
             if (std::find(commands.begin(), commands.end(), cmd) != commands.end()) {
                 if (cmd == "add_user") {
-                    std::string username = receiveData(clientSocket);
-                    std::string password = receiveData(clientSocket);
+                    std::string username = receiveData(clientSocket.get());
+                    std::string password = receiveData(clientSocket.get());
                     std::string hash = hash_password(password);
-                    addUser(username, hash);
+                    addUser(username, hash, true);
+                    std::string response = "User created";
+                    sendData(clientSocket.get(), response);
                 }
             } else {
                 std::string error = "Error: Command " + cmd + " does not exist";
-                std::cerr << error << std::endl;
+                sendData(clientSocket.get(), error);
             }
             cmd = receiveData(clientSocket.get());
         }

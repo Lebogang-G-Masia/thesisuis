@@ -10,12 +10,12 @@ void Client::signin(int clientSocket) {
     std::cout << "Enter username." << std::endl;
     std::cout << ">> "; 
     std::string username = userInput();
+    sendData(clientSocket, username);
     std::cout << "Enter password." << std::endl;
     std::cout << ">> ";
     std::string password = userInput(true);
-    std::cout << std::endl;
-    sendData(clientSocket, username);
     sendData(clientSocket, password);
+    std::cout << std::endl;
 }
 
 int Client::createSocket() {

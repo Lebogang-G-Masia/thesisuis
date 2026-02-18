@@ -48,7 +48,7 @@ void sendData(int clientSocket, std::string& msg) {
 
 std::string receiveData(int clientSocket) {
     uint32_t network_length = 0;
-    int bytesRecv = recv(clientSocket, &network_length, sizeof(network_length), 0);
+    int bytesRecv = recv(clientSocket, &network_length, sizeof(network_length), MSG_WAITALL);
     if (bytesRecv <= 0) return "";
     // convert back to host bytes order
     uint32_t length = ntohl(network_length);
@@ -57,7 +57,7 @@ std::string receiveData(int clientSocket) {
     uint32_t totalRecv = 0;
 
     while (totalRecv < length) {
-        int b = recv(clientSocket, buffer.data() + totalRecv, length - totalRecv, 0);
+        int b = recv(clientSocket, buffer.data() + totalRecv, length - totalRecv, MSG_WAITALL);
         if (b <= 0) return "";
         totalRecv += b;
     }

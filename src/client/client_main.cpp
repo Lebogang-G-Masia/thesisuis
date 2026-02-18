@@ -16,6 +16,10 @@ int main() {
         std::string cmd {};
         std::getline(std::cin, cmd);
         sendData(clientSocket.get(), cmd);
+        if (cmd == "add_user") client.signin(clientSocket.get());
+        else if (cmd == "exit") break;
+        std::string response = receiveData(clientSocket.get());
+        std::cout << response << std::endl;
     }
     return 0;
 }
